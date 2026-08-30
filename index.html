@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quantum Jitter & Topological Math Simulator</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+    
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    .font-mono-code {
+      font-family: 'JetBrains Mono', monospace;
+    }
+    
+    /* Custom Slider Styles */
+    input[type=range] {
+      -webkit-appearance: none;
+      background: transparent;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      height: 18px;
+      width: 18px;
+      border-radius: 50%;
+      background: #38bdf8;
+      cursor: pointer;
+      box-shadow: 0 0 10px rgba(56, 189, 248, 0.8), 0 0 2px #fff;
+      margin-top: -6px;
+      border: 2px solid #ffffff;
+      transition: transform 0.1s ease;
+    }
+    input[type=range]::-webkit-slider-thumb:hover {
+      transform: scale(1.2);
+    }
+    input[type=range]::-webkit-slider-runnable-track {
+      width: 100%;
+      height: 6px;
+      background: #1e293b;
+      border-radius: 9999px;
+      border: 1px solid #334155;
+    }
+    
+    .glow-cyan {
+      box-shadow: 0 0 25px -5px rgba(6, 182, 212, 0.4);
+    }
+    .glow-purple {
+      box-shadow: 0 0 25px -5px rgba(168, 85, 247, 0.4);
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col selection:bg-cyan-500 selection:text-slate-950">
+
+  <!-- Header -->
+  <header class="border-b border-slate-800/80 bg-slate-900/50 backdrop-blur-md sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-cyan-500/20">
+          <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+          </svg>
+        </div>
+        <div>
+          <h1 class="text-base sm:text-lg font-bold bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">
+            Quantum Jitter & Topological Math Simulator
+          </h1>
+          <p class="text-xs text-cyan-400 font-mono-code">Heisenberg Zero-Point Fluctuations vs. Topological Invariance</p>
+        </div>
+      </div>
+
+      <!-- Quick Presets -->
+      <div class="flex items-center gap-2">
+        <button id="btn-preset-room" class="px-2.5 py-1.5 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition">
+          300K Warm
+        </button>
+        <button id="btn-preset-zero" class="px-2.5 py-1.5 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-cyan-300 border border-cyan-500/30 transition">
+          0.01K (Cooling Only)
+        </button>
+        <button id="btn-preset-math" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-gradient-to-r from-cyan-500 to-indigo-600 text-white shadow-md shadow-cyan-500/20 hover:opacity-90 transition">
+          Math Topology (Immune)
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Layout -->
+  <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+    <!-- Left Controls & Slider Column (5 Cols) -->
+    <div class="lg:col-span-5 flex flex-col gap-5">
+
+      <!-- Physical Environment Card -->
+      <div class="bg-slate-900/70 border border-slate-800 rounded-2xl p-5 shadow-xl backdrop-blur-sm">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-800/80 mb-4">
+          <div class="flex items-center gap-2">
+            <span class="p-1.5 rounded-lg bg-blue-500/10 text-blue-400">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/></svg>
+            </span>
+            <h2 class="text-sm font-bold uppercase tracking-wider text-slate-200">1. Physical Refrigeration</h2>
+          </div>
+          <span id="label-temp-status" class="text-xs px-2 py-0.5 rounded-full font-mono-code bg-red-500/10 text-red-400 border border-red-500/30">
+            Room Temp
+          </span>
+        </div>
+
+        <!-- Slider 1: Temperature -->
+        <div class="mb-5">
+          <div class="flex justify-between items-baseline mb-1.5">
+            <label for="slider-temp" class="text-xs font-semibold text-slate-300">Temperature (Kelvin)</label>
+            <span class="text-sm font-mono-code font-bold text-sky-400" id="val-temp">300.0 K</span>
+          </div>
+          <input type="range" id="slider-temp" min="0.01" max="300" step="0.1" value="300" class="w-full">
+          <div class="flex justify-between text-[10px] text-slate-500 mt-1 font-mono-code">
+            <span>0.01 K (Dilution Fridge)</span>
+            <span>77 K (Liq. N2)</span>
+            <span>300 K (Room)</span>
+          </div>
+          <p class="text-[11px] text-slate-400 mt-2 leading-relaxed">
+            Cooling kills <em>thermal motion</em> ($k_B T$), but hits a hard physics barrier at absolute zero.
+          </p>
+        </div>
+
+        <!-- Slider 2: Heisenberg Zero-Point Energy -->
+        <div>
+          <div class="flex justify-between items-baseline mb-1.5">
+            <label for="slider-zpe" class="text-xs font-semibold text-slate-300">Quantum Zero-Point Jitter ($\Delta x \cdot \Delta p \ge \frac{\hbar}{2}$)</label>
+            <span class="text-sm font-mono-code font-bold text-amber-400" id="val-zpe">100%</span>
+          </div>
+          <input type="range" id="slider-zpe" min="10" max="100" step="1" value="100" class="w-full">
+          <div class="flex justify-between text-[10px] text-slate-500 mt-1 font-mono-code">
+            <span>Min Uncertainty</span>
+            <span>Standard Vacuum Jitter</span>
+          </div>
+          <p class="text-[11px] text-slate-400 mt-2 leading-relaxed">
+            Particles never stand still. Even at $0\text{ K}$, vacuum fluctuations shake the physical qubits.
+          </p>
+        </div>
+      </div>
+
+      <!-- Mathematical Solution Card -->
+      <div class="bg-slate-900/70 border border-slate-800 rounded-2xl p-5 shadow-xl backdrop-blur-sm glow-cyan">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-800/80 mb-4">
+          <div class="flex items-center gap-2">
+            <span class="p-1.5 rounded-lg bg-cyan-500/10 text-cyan-400">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+            </span>
+            <h2 class="text-sm font-bold uppercase tracking-wider text-slate-200">2. The Mathematical Cure</h2>
+          </div>
+          <span id="label-math-status" class="text-xs px-2 py-0.5 rounded-full font-mono-code bg-slate-800 text-slate-400 border border-slate-700">
+            Unprotected
+          </span>
+        </div>
+
+        <!-- Slider 3: Topological Invariance / Braiding -->
+        <div class="mb-5">
+          <div class="flex justify-between items-baseline mb-1.5">
+            <label for="slider-topology" class="text-xs font-semibold text-slate-300">
+              Topological Braiding Protection ($U = \mathcal{P}e^{\oint \mathcal{A}}$)
+            </label>
+            <span class="text-sm font-mono-code font-bold text-cyan-400" id="val-topology">0%</span>
+          </div>
+          <input type="range" id="slider-topology" min="0" max="100" step="1" value="0" class="w-full">
+          <div class="flex justify-between text-[10px] text-slate-500 mt-1 font-mono-code">
+            <span>0% (Raw Point Qubit)</span>
+            <span>100% (Non-Abelian Knot)</span>
+          </div>
+          <p class="text-[11px] text-slate-400 mt-2 leading-relaxed">
+            Encodes the logical bit into the <strong>global geometry (knot)</strong> of many anyons. Micro-jitters cannot untie a topological braid!
+          </p>
+        </div>
+
+        <!-- Slider 4: Active Quantum Error Correction -->
+        <div>
+          <div class="flex justify-between items-baseline mb-1.5">
+            <label for="slider-qec" class="text-xs font-semibold text-slate-300">
+              Mathematical Parity Check Depth (Surface Code)
+            </label>
+            <span class="text-sm font-mono-code font-bold text-purple-400" id="val-qec">0%</span>
+          </div>
+          <input type="range" id="slider-qec" min="0" max="100" step="1" value="0" class="w-full">
+          <div class="flex justify-between text-[10px] text-slate-500 mt-1 font-mono-code">
+            <span>None</span>
+            <span>Distance-7 Syndrome Filter</span>
+          </div>
+          <p class="text-[11px] text-slate-400 mt-2 leading-relaxed">
+            Continuously computes multi-qubit stabilizer parity equations to mathematically cancel out residual phase drifts in real time.
+          </p>
+        </div>
+      </div>
+
+      <!-- Action Button: Disturb / Cosmic Ray Pulse -->
+      <button id="btn-perturb" class="w-full py-3 px-4 rounded-xl font-bold text-sm bg-gradient-to-r from-rose-500/20 via-amber-500/20 to-rose-500/20 hover:from-rose-500/30 hover:to-amber-500/30 border border-rose-500/40 text-rose-300 flex items-center justify-center gap-2 transition active:scale-[0.99] shadow-lg shadow-rose-950/40">
+        <svg class="w-4 h-4 text-rose-400 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+        Trigger Cosmic Ray / Thermal Spike (Test Immunity)
+      </button>
+
+    </div>
+
+    <!-- Right Live Simulation Canvas & Telemetry Column (7 Cols) -->
+    <div class="lg:col-span-7 flex flex-col gap-4">
+
+      <!-- Live Canvas Card -->
+      <div class="bg-slate-900/90 border border-slate-800 rounded-2xl overflow-hidden flex flex-col shadow-2xl relative">
+        
+        <!-- Canvas Bar -->
+        <div class="px-4 py-3 bg-slate-900 border-b border-slate-800 flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span>
+            <span class="text-xs font-mono-code font-bold uppercase tracking-wider text-slate-300">Live Quantum State Manifold</span>
+          </div>
+          <div class="flex items-center gap-3 text-[11px] font-mono-code text-slate-400">
+            <span>FPS: <span id="fps-counter" class="text-slate-200 font-bold">60</span></span>
+            <span class="text-slate-600">|</span>
+            <span>Interactive: Click or drag on canvas</span>
+          </div>
+        </div>
+
+        <!-- The Canvas -->
+        <div class="relative w-full aspect-[16/11] bg-slate-950">
+          <canvas id="quantumCanvas" class="w-full h-full block cursor-crosshair"></canvas>
+
+          <!-- Overlay HUD Metrics -->
+          <div class="absolute top-3 left-3 flex flex-col gap-1.5 pointer-events-none">
+            <div class="bg-slate-900/80 backdrop-blur-md px-2.5 py-1 rounded-lg border border-slate-700/60 flex items-center gap-2">
+              <span class="text-[10px] uppercase font-mono-code text-slate-400">Physical Jitter Amplitude:</span>
+              <span id="hud-phys-jitter" class="text-xs font-mono-code font-bold text-rose-400">28.4 nm</span>
+            </div>
+            <div class="bg-slate-900/80 backdrop-blur-md px-2.5 py-1 rounded-lg border border-slate-700/60 flex items-center gap-2">
+              <span class="text-[10px] uppercase font-mono-code text-slate-400">Logical State Jitter:</span>
+              <span id="hud-log-jitter" class="text-xs font-mono-code font-bold text-cyan-400">28.4 nm</span>
+            </div>
+          </div>
+
+          <!-- Bloch Sphere Inset Indicator -->
+          <div class="absolute bottom-3 right-3 bg-slate-900/85 backdrop-blur-md p-2.5 rounded-xl border border-slate-700/60 shadow-lg flex items-center gap-3 pointer-events-none">
+            <div class="relative w-12 h-12 flex items-center justify-center">
+              <svg class="w-12 h-12 text-slate-700" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="42" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="3,3"/>
+                <ellipse cx="50" cy="50" rx="42" ry="14" fill="none" stroke="currentColor" stroke-width="1.5"/>
+                <line x1="50" y1="8" x2="50" y2="92" stroke="currentColor" stroke-width="1.5"/>
+              </svg>
+              <!-- Qubit Pointer Arrow -->
+              <div id="bloch-vector" class="absolute w-1 h-8 bg-gradient-to-t from-cyan-400 to-white origin-bottom rounded-full transition-transform duration-75" style="transform: rotate(45deg) translateY(-8px);"></div>
+            </div>
+            <div>
+              <div class="text-[10px] uppercase font-mono-code text-slate-400">Logical Qubit State</div>
+              <div id="hud-qubit-status" class="text-xs font-mono-code font-bold text-amber-400">Decohering...</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Real-time Metrics Grid -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        
+        <div class="bg-slate-900/70 border border-slate-800 rounded-xl p-3">
+          <div class="text-[10px] uppercase font-mono-code text-slate-400 mb-1">State Fidelity</div>
+          <div class="text-lg font-mono-code font-bold text-emerald-400" id="metric-fidelity">12.4%</div>
+          <div class="w-full bg-slate-800 h-1.5 rounded-full mt-2 overflow-hidden">
+            <div id="bar-fidelity" class="bg-emerald-400 h-full w-[12.4%] transition-all duration-150"></div>
+          </div>
+        </div>
+
+        <div class="bg-slate-900/70 border border-slate-800 rounded-xl p-3">
+          <div class="text-[10px] uppercase font-mono-code text-slate-400 mb-1">Thermal Noise ($k_B T$)</div>
+          <div class="text-lg font-mono-code font-bold text-sky-400" id="metric-thermal">25.8 meV</div>
+          <div class="w-full bg-slate-800 h-1.5 rounded-full mt-2 overflow-hidden">
+            <div id="bar-thermal" class="bg-sky-400 h-full w-[100%] transition-all duration-150"></div>
+          </div>
+        </div>
+
+        <div class="bg-slate-900/70 border border-slate-800 rounded-xl p-3">
+          <div class="text-[10px] uppercase font-mono-code text-slate-400 mb-1">Quantum ZPE Floor</div>
+          <div class="text-lg font-mono-code font-bold text-amber-400" id="metric-zpe">Active (Non-Zero)</div>
+          <div class="w-full bg-slate-800 h-1.5 rounded-full mt-2 overflow-hidden">
+            <div class="bg-amber-400 h-full w-full"></div>
+          </div>
+        </div>
+
+        <div class="bg-slate-900/70 border border-slate-800 rounded-xl p-3">
+          <div class="text-[10px] uppercase font-mono-code text-slate-400 mb-1">Topological Knot Lock</div>
+          <div class="text-lg font-mono-code font-bold text-cyan-400" id="metric-topo">0.00 / 1.00</div>
+          <div class="w-full bg-slate-800 h-1.5 rounded-full mt-2 overflow-hidden">
+            <div id="bar-topo" class="bg-cyan-400 h-full w-[0%] transition-all duration-150"></div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Explanatory Banner -->
+      <div class="bg-gradient-to-r from-cyan-950/40 via-slate-900 to-indigo-950/40 border border-cyan-500/20 rounded-xl p-4 text-xs leading-relaxed text-slate-300">
+        <strong class="text-cyan-300 font-semibold">How the Math Works:</strong> 
+        Look at the blue nodes (physical particles) vs. the glowing braided ribbons (the mathematical information). As you slide <strong class="text-cyan-400">Topological Braiding</strong> to 100%, notice that even when the individual particles vibrate rapidly from quantum jitter, the <em>global braided shape</em> remains locked and completely immune to noise.
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- Script Logic -->
+  <script>
+    // State variables
+    let temp = 300;
+    let zpeFactor = 1.0;
+    let topologyProtection = 0.0;
+    let qecFactor = 0.0;
+    let perturbation = 0.0;
+
+    // DOM Elements
+    const sliderTemp = document.getElementById('slider-temp');
+    const valTemp = document.getElementById('val-temp');
+    const labelTempStatus = document.getElementById('label-temp-status');
+
+    const sliderZpe = document.getElementById('slider-zpe');
+    const valZpe = document.getElementById('val-zpe');
+
+    const sliderTopology = document.getElementById('slider-topology');
+    const valTopology = document.getElementById('val-topology');
+    const labelMathStatus = document.getElementById('label-math-status');
+
+    const sliderQec = document.getElementById('slider-qec');
+    const valQec = document.getElementById('val-qec');
+
+    const btnPerturb = document.getElementById('btn-perturb');
+    const btnPresetRoom = document.getElementById('btn-preset-room');
+    const btnPresetZero = document.getElementById('btn-preset-zero');
+    const btnPresetMath = document.getElementById('btn-preset-math');
+
+    const hudPhysJitter = document.getElementById('hud-phys-jitter');
+    const hudLogJitter = document.getElementById('hud-log-jitter');
+    const hudQubitStatus = document.getElementById('hud-qubit-status');
+    const blochVector = document.getElementById('bloch-vector');
+
+    const metricFidelity = document.getElementById('metric-fidelity');
+    const barFidelity = document.getElementById('bar-fidelity');
+    const metricThermal = document.getElementById('metric-thermal');
+    const barThermal = document.getElementById('bar-thermal');
+    const metricTopo = document.getElementById('metric-topo');
+    const barTopo = document.getElementById('bar-topo');
+    const fpsCounter = document.getElementById('fps-counter');
+
+    // Canvas setup
+    const canvas = document.getElementById('quantumCanvas');
+    const ctx = canvas.getContext('2d');
+    let width = 0;
+    let height = 0;
+
+    function resizeCanvas() {
+      const rect = canvas.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      width = rect.width;
+      height = rect.height;
+      canvas.width = width * dpr;
+      canvas.height = height * dpr;
+      ctx.scale(dpr, dpr);
+    }
+    window.addEventListener('resize', resizeCanvas);
+
+    // Particle Lattice Initialization
+    const NUM_NODES = 8;
+    const nodes = [];
+    for (let i = 0; i < NUM_NODES; i++) {
+      nodes.push({
+        baseAngle: (i / NUM_NODES) * Math.PI * 2,
+        phaseOffset: Math.random() * Math.PI * 2,
+        freq: 2.5 + Math.random() * 2.0,
+        x: 0,
+        y: 0,
+        logicalX: 0,
+        logicalY: 0,
+        vx: 0,
+        vy: 0
+      });
+    }
+
+    // Interactive pointer
+    let pointer = { x: null, y: null, active: false };
+    canvas.addEventListener('pointerdown', (e) => {
+      pointer.active = true;
+      updatePointer(e);
+      perturbation = Math.min(perturbation + 0.6, 1.0);
+    });
+    canvas.addEventListener('pointermove', (e) => {
+      if (pointer.active) updatePointer(e);
+    });
+    window.addEventListener('pointerup', () => { pointer.active = false; });
+
+    function updatePointer(e) {
+      const rect = canvas.getBoundingClientRect();
+      pointer.x = e.clientX - rect.left;
+      pointer.y = e.clientY - rect.top;
+    }
+
+    // Presets
+    btnPresetRoom.addEventListener('click', () => {
+      setValues({ temp: 300, zpe: 100, topo: 0, qec: 0 });
+    });
+    btnPresetZero.addEventListener('click', () => {
+      setValues({ temp: 0.01, zpe: 100, topo: 0, qec: 0 });
+    });
+    btnPresetMath.addEventListener('click', () => {
+      setValues({ temp: 0.01, zpe: 100, topo: 100, qec: 85 });
+    });
+
+    btnPerturb.addEventListener('click', () => {
+      perturbation = 1.0;
+    });
+
+    function setValues({ temp: t, zpe: z, topo: tp, qec: q }) {
+      sliderTemp.value = t;
+      sliderZpe.value = z;
+      sliderTopology.value = tp;
+      sliderQec.value = q;
+      updateFromInputs();
+    }
+
+    // Input change listeners
+    [sliderTemp, sliderZpe, sliderTopology, sliderQec].forEach(el => {
+      el.addEventListener('input', updateFromInputs);
+    });
+
+    function updateFromInputs() {
+      temp = parseFloat(sliderTemp.value);
+      zpeFactor = parseFloat(sliderZpe.value) / 100;
+      topologyProtection = parseFloat(sliderTopology.value) / 100;
+      qecFactor = parseFloat(sliderQec.value) / 100;
+
+      // Update Labels
+      valTemp.textContent = temp < 1 ? `${temp.toFixed(2)} K` : `${temp.toFixed(1)} K`;
+      valZpe.textContent = `${sliderZpe.value}%`;
+      valTopology.textContent = `${sliderTopology.value}%`;
+      valQec.textContent = `${sliderQec.value}%`;
+
+      // Status badges
+      if (temp < 1) {
+        labelTempStatus.textContent = '0.01K (Cryo Frozen)';
+        labelTempStatus.className = 'text-xs px-2 py-0.5 rounded-full font-mono-code bg-sky-500/10 text-sky-400 border border-sky-500/30';
+      } else if (temp < 100) {
+        labelTempStatus.textContent = 'Cold (77K)';
+        labelTempStatus.className = 'text-xs px-2 py-0.5 rounded-full font-mono-code bg-amber-500/10 text-amber-400 border border-amber-500/30';
+      } else {
+        labelTempStatus.textContent = 'Warm (300K)';
+        labelTempStatus.className = 'text-xs px-2 py-0.5 rounded-full font-mono-code bg-red-500/10 text-red-400 border border-red-500/30';
+      }
+
+      if (topologyProtection > 0.75) {
+        labelMathStatus.textContent = 'Topologically Locked';
+        labelMathStatus.className = 'text-xs px-2 py-0.5 rounded-full font-mono-code bg-cyan-500/10 text-cyan-300 border border-cyan-500/40 font-bold';
+      } else if (topologyProtection > 0.2) {
+        labelMathStatus.textContent = 'Partial Invariance';
+        labelMathStatus.className = 'text-xs px-2 py-0.5 rounded-full font-mono-code bg-purple-500/10 text-purple-300 border border-purple-500/30';
+      } else {
+        labelMathStatus.textContent = 'Unprotected';
+        labelMathStatus.className = 'text-xs px-2 py-0.5 rounded-full font-mono-code bg-slate-800 text-slate-400 border border-slate-700';
+      }
+    }
+
+    // Initial sync
+    updateFromInputs();
+
+    // Animation Loop
+    let lastTime = performance.now();
+    let frameCount = 0;
+    let fpsTimer = 0;
+
+    function render(currentTime) {
+      const dt = Math.min((currentTime - lastTime) / 1000, 0.1);
+      lastTime = currentTime;
+
+      // FPS Calculation
+      frameCount++;
+      fpsTimer += dt;
+      if (fpsTimer >= 0.5) {
+        fpsCounter.textContent = Math.round(frameCount / fpsTimer);
+        frameCount = 0;
+        fpsTimer = 0;
+      }
+
+      // Decay perturbation
+      perturbation = Math.max(0, perturbation - dt * 0.8);
+
+      // Physics calculations
+      const thermalAmplitude = Math.sqrt(temp / 300) * 35;
+      const zpeAmplitude = zpeFactor * 14; // Unremovable quantum floor
+      const perturbationAmp = perturbation * 45;
+
+      const totalPhysicalJitter = thermalAmplitude + zpeAmplitude + perturbationAmp;
+      
+      // Math attenuation formula
+      // Topological math eliminates local jitter quadratically; QEC handles the residual
+      const mathProtectionFactor = Math.pow(1 - topologyProtection, 2.4) * Math.pow(1 - qecFactor, 1.8);
+      const effectiveLogicalJitter = totalPhysicalJitter * mathProtectionFactor;
+
+      // Fidelity formula: 100% when logical jitter -> 0
+      const fidelity = Math.max(0, Math.min(100, 100 - (effectiveLogicalJitter * 2.1)));
+
+      // Update Telemetry UI
+      hudPhysJitter.textContent = `${totalPhysicalJitter.toFixed(1)} nm`;
+      hudLogJitter.textContent = `${effectiveLogicalJitter.toFixed(1)} nm`;
+      
+      metricFidelity.textContent = `${fidelity.toFixed(1)}%`;
+      barFidelity.style.width = `${fidelity}%`;
+      if (fidelity > 90) {
+        metricFidelity.className = 'text-lg font-mono-code font-bold text-emerald-400';
+        barFidelity.className = 'bg-emerald-400 h-full';
+        hudQubitStatus.textContent = 'Coherent (Protected)';
+        hudQubitStatus.className = 'text-xs font-mono-code font-bold text-emerald-400';
+      } else if (fidelity > 50) {
+        metricFidelity.className = 'text-lg font-mono-code font-bold text-amber-400';
+        barFidelity.className = 'bg-amber-400 h-full';
+        hudQubitStatus.textContent = 'Phase Drifting';
+        hudQubitStatus.className = 'text-xs font-mono-code font-bold text-amber-400';
+      } else {
+        metricFidelity.className = 'text-lg font-mono-code font-bold text-rose-400';
+        barFidelity.className = 'bg-rose-400 h-full';
+        hudQubitStatus.textContent = 'Decohering (Lost)';
+        hudQubitStatus.className = 'text-xs font-mono-code font-bold text-rose-400';
+      }
+
+      // Bloch sphere pointer wobble
+      const blochAngle = (1 - fidelity / 100) * Math.sin(currentTime * 0.008) * 160;
+      blochVector.style.transform = `rotate(${blochAngle}deg) translateY(-8px)`;
+
+      const thermal_meV = (temp * 0.0862).toFixed(2);
+      metricThermal.textContent = `${thermal_meV} meV`;
+      barThermal.style.width = `${Math.min(100, (temp / 300) * 100)}%`;
+
+      metricTopo.textContent = `${topologyProtection.toFixed(2)} / 1.00`;
+      barTopo.style.width = `${topologyProtection * 100}%`;
+
+      // Clear Canvas
+      ctx.fillStyle = '#020617';
+      ctx.fillRect(0, 0, width, height);
+
+      const centerX = width / 2;
+      const centerY = height / 2;
+      const radius = Math.min(width, height) * 0.32;
+
+      // Draw subtle background grid
+      ctx.strokeStyle = 'rgba(30, 41, 59, 0.4)';
+      ctx.lineWidth = 1;
+      const gridSize = 30;
+      for (let x = 0; x < width; x += gridSize) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, height);
+        ctx.stroke();
+      }
+      for (let y = 0; y < height; y += gridSize) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(width, y);
+        ctx.stroke();
+      }
+
+      // Update node positions with physical jitter and logical smoothed paths
+      nodes.forEach((node, i) => {
+        const angle = node.baseAngle + currentTime * 0.0003;
+        const targetX = centerX + Math.cos(angle) * radius;
+        const targetY = centerY + Math.sin(angle) * radius;
+
+        // Physical high-frequency jitter (Thermal + Quantum ZPE)
+        const tJitterX = (Math.sin(currentTime * 0.005 * node.freq + node.phaseOffset) * 0.6 + (Math.random() - 0.5)) * totalPhysicalJitter;
+        const tJitterY = (Math.cos(currentTime * 0.006 * node.freq + node.phaseOffset) * 0.6 + (Math.random() - 0.5)) * totalPhysicalJitter;
+
+        node.x = targetX + tJitterX;
+        node.y = targetY + tJitterY;
+
+        // Logical node positions (What the math sees)
+        const lJitterX = tJitterX * mathProtectionFactor;
+        const lJitterY = tJitterY * mathProtectionFactor;
+        node.logicalX = targetX + lJitterX;
+        node.logicalY = targetY + lJitterY;
+      });
+
+      // 1. Draw Braided Topological Quantum Ribbons
+      ctx.save();
+      for (let i = 0; i < NUM_NODES; i++) {
+        const nextNode = nodes[(i + 1) % NUM_NODES];
+        const currNode = nodes[i];
+
+        // Draw mathematical ribbon between logical coordinates
+        ctx.beginPath();
+        ctx.moveTo(currNode.logicalX, currNode.logicalY);
+
+        // Curving control point for braiding
+        const midX = (currNode.logicalX + nextNode.logicalX) / 2;
+        const midY = (currNode.logicalY + nextNode.logicalY) / 2;
+        const normAngle = Math.atan2(nextNode.logicalY - currNode.logicalY, nextNode.logicalX - currNode.logicalX) + Math.PI / 2;
+        const braidOffset = Math.sin(currentTime * 0.003 + i) * (15 + topologyProtection * 25);
+        const cpX = midX + Math.cos(normAngle) * braidOffset;
+        const cpY = midY + Math.sin(normAngle) * braidOffset;
+
+        ctx.quadraticCurveTo(cpX, cpY, nextNode.logicalX, nextNode.logicalY);
+
+        if (topologyProtection > 0.5) {
+          // Protected topological braid (Cyan/Emerald vibrant ribbon)
+          ctx.strokeStyle = `rgba(6, 182, 212, ${0.4 + topologyProtection * 0.5})`;
+          ctx.lineWidth = 4 + topologyProtection * 3;
+          ctx.shadowColor = '#06b6d4';
+          ctx.shadowBlur = 15 * topologyProtection;
+          ctx.stroke();
+
+          // Second inner core line
+          ctx.strokeStyle = `rgba(255, 255, 255, ${0.6 + topologyProtection * 0.4})`;
+          ctx.lineWidth = 1.5;
+          ctx.shadowBlur = 0;
+          ctx.stroke();
+        } else {
+          // Unprotected decaying ribbon (Frayed/Red/Broken)
+          ctx.strokeStyle = `rgba(244, 63, 94, ${0.2 + (1 - fidelity/100) * 0.5})`;
+          ctx.lineWidth = 2;
+          ctx.setLineDash([4, 6]);
+          ctx.stroke();
+          ctx.setLineDash([]);
+        }
+      }
+      ctx.restore();
+
+      // 2. Draw Cross-Syndrome Stabilizer Parity Links (Active QEC)
+      if (qecFactor > 0.05) {
+        ctx.save();
+        ctx.strokeStyle = `rgba(168, 85, 247, ${qecFactor * 0.45})`;
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([2, 4]);
+        for (let i = 0; i < NUM_NODES / 2; i++) {
+          const opposite = nodes[(i + 4) % NUM_NODES];
+          ctx.beginPath();
+          ctx.moveTo(nodes[i].logicalX, nodes[i].logicalY);
+          ctx.lineTo(opposite.logicalX, opposite.logicalY);
+          ctx.stroke();
+        }
+        ctx.restore();
+      }
+
+      // 3. Draw Physical Quantum Particles (Blue/Red vibrating dots)
+      nodes.forEach((node, i) => {
+        // Line linking physical vibrating particle to logical anchor
+        if (topologyProtection > 0.1) {
+          ctx.beginPath();
+          ctx.moveTo(node.x, node.y);
+          ctx.lineTo(node.logicalX, node.logicalY);
+          ctx.strokeStyle = 'rgba(148, 163, 184, 0.25)';
+          ctx.lineWidth = 1;
+          ctx.stroke();
+        }
+
+        // Particle Glow
+        ctx.save();
+        const pGlow = ctx.createRadialGradient(node.x, node.y, 2, node.x, node.y, 14);
+        pGlow.addColorStop(0, 'rgba(56, 189, 248, 0.9)');
+        pGlow.addColorStop(0.5, 'rgba(56, 189, 248, 0.3)');
+        pGlow.addColorStop(1, 'rgba(56, 189, 248, 0)');
+        ctx.fillStyle = pGlow;
+        ctx.beginPath();
+        ctx.arc(node.x, node.y, 14, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Particle Core
+        ctx.fillStyle = temp > 150 ? '#f43f5e' : (topologyProtection > 0.5 ? '#38bdf8' : '#e2e8f0');
+        ctx.beginPath();
+        ctx.arc(node.x, node.y, 4.5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+
+        // If math is high, also render the locked logical topological node
+        if (topologyProtection > 0.4) {
+          ctx.save();
+          ctx.fillStyle = '#ffffff';
+          ctx.shadowColor = '#06b6d4';
+          ctx.shadowBlur = 8;
+          ctx.beginPath();
+          ctx.arc(node.logicalX, node.logicalY, 3, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        }
+      });
+
+      // 4. Draw Cosmic Ray / Perturbation Wave Effect
+      if (perturbation > 0.05) {
+        ctx.save();
+        const shockRadius = (1 - perturbation) * Math.max(width, height) * 0.7;
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, shockRadius, 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(244, 63, 94, ${perturbation * 0.7})`;
+        ctx.lineWidth = 4 * perturbation;
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      requestAnimationFrame(render);
+    }
+
+    // Init sizing and start
+    window.addEventListener('load', () => {
+      resizeCanvas();
+      requestAnimationFrame(render);
+    });
+  </script>
+</body>
+</html>
